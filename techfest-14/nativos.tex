@@ -1,0 +1,138 @@
+\documentclass{beamer}
+
+% Español
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Tipo de letra
+\usepackage{palatino}
+
+% Plantilla
+\usetheme{Antibes}
+%\usetheme{Berlin}
+
+\usepackage{listings}
+\lstdefinestyle{cpp11}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  language=C++,
+  showstringspaces=false,
+  basicstyle=\scriptsize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  columns=flexible,
+  %inputenconding=utf8,
+  extendedchars=true,
+  morekeywords=[1]{_Pragma,constexpr,nullptr,alignof,alignas},
+  literate=%
+    {¿}{{?`}}1
+    {á}{{\'a}}1
+    {é}{{\'e}}1
+    {í}{{\'i}}1
+    {ó}{{\'o}}1
+    {ú}{{\'u}}1
+    {ñ}{{\~n}}1
+}
+
+\newcommand{\cppkey}[1]{%
+{\color{green!40!black}\textbf{\texttt{#1}}}%
+}
+
+\newcommand{\cppid}[1]{%
+{\color{blue}\texttt{#1}}%
+}
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}J. Daniel Garcia -- ARCOS@UC3M (josedaniel.garcia@uc3m.es)
+    \hfill
+    \insertframenumber/\inserttotalframenumber
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows}
+\usetikzlibrary{mindmap}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.5}
+
+\usepackage{tabularx}
+
+\addtobeamertemplate{headline}{}
+{% 
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=north east] at (current page.north east) {\includegraphics[height=0.7cm]{logos/arcos.png}};
+\end{tikzpicture}
+}
+
+\addtobeamertemplate{footline}{}
+{% 
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=south east,outer ysep=0.8cm] at (current page.south east) {\includegraphics[height=0.7cm]{logos/techfest.png}};
+\end{tikzpicture}
+}
+
+  \tikzset{
+    invisible/.style={opacity=0},
+    visible on/.style={alt=#1{}{invisible}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+    },
+  }
+
+%Portada
+\title{Lenguajes nativos versus máquinas virtuales}
+\author{J. Daniel Garcia}
+\institute{Universidad Carlos III de Madrid}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\AtBeginSection[]
+{
+  \begin{frame}<*>
+    \setbeamertemplate{section in toc shaded}[default][50]
+    \setbeamertemplate{subsection in toc shaded}[default][50]
+    \tableofcontents[currentsection,hideallsubsections]
+  \end{frame}
+}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \setbeamertemplate{subsection in toc shaded}[default][50]
+    \tableofcontents[sectionstyle=show/hide,subsectionstyle=show/shaded/hide]
+  \end{frame}
+}
+
+\begin{frame}{ADVERTENCIA}
+Este material presenta una visión subjetiva.
+\vfill
+Recoge argumentos recurrentes en conversaciones durante los últimos años con colegas de la industria y la universidad.
+\end{frame}
+
+\input{por-que}
+\input{leng-nativos}
+\input{no-nativos}
+\input{industrial}
+\input{docencia}
+
+\section{¿Y ahora qué?}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\end{document}
