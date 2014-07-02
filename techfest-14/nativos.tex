@@ -12,6 +12,9 @@
 \usetheme{Antibes}
 %\usetheme{Berlin}
 
+
+\usepackage[scale=1.2]{ccicons}
+
 \usepackage{listings}
 \lstdefinestyle{cpp11}{
   belowcaptionskip=1\baselineskip,
@@ -49,7 +52,7 @@
 \setbeamertemplate{footline}{
   \leavevmode%
   \hbox{\begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}%
-    \usebeamerfont{author in head/foot}J. Daniel Garcia -- ARCOS@UC3M (josedaniel.garcia@uc3m.es)
+    \usebeamerfont{author in head/foot} J. Daniel Garcia -- ARCOS@UC3M (josedaniel.garcia@uc3m.es)
     \hfill
     \insertframenumber/\inserttotalframenumber
   \end{beamercolorbox}}%
@@ -77,6 +80,13 @@
 {% 
 \begin{tikzpicture}[remember picture,overlay]
 \node[anchor=south east,outer ysep=0.8cm] at (current page.south east) {\includegraphics[height=0.7cm]{logos/techfest.png}};
+\end{tikzpicture}
+}
+
+\addtobeamertemplate{footline}{}
+{% 
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=south west,outer ysep=0.5cm] at (current page.south west) {\ccbyncsaeu};
 \end{tikzpicture}
 }
 
