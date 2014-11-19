@@ -1,0 +1,178 @@
+\subsection{Introducción}
+
+\begin{frame}[fragile]{Exclusión mutua}
+\begin{itemize}
+  \item \cppid{mutex} permite controlar el acceso con exclusión mutua a un recurso.
+    \begin{itemize}
+      \item \cppid{lock()}: Adquiere el cerrojo asociado.
+      \item \cppid{unlock()}: Libera el cerrojo asociado.
+    \end{itemize}
+\end{itemize}
+\pause
+\begin{block}{Ejemplo}
+\begin{lstlisting}
+mutex m;
+int x = 0;
+
+void f() {
+  m.lock();
+  ++x;
+  m.unlock();
+}
+
+void g() {
+  thread t1(f); thread t2(f);
+  t1.join(); t2.join();
+
+  cout << x << endl;
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Problemas con \texttt{lock()}/\texttt{unlock()}}
+\begin{itemize}
+  \item Posibles problemas:
+    \begin{itemize}
+      \item Olvido de liberar cerrojo.
+      \item Excepciones.
+    \end{itemize}
+\end{itemize}
+\pause
+\begin{block}{Solución unique\_lock}
+\begin{lstlisting}
+mutex m;
+int x = 0;
+
+void f() {
+  unique_lock<mutex> l{m}; // Adquiere el cerrojo
+  ++x;
+} // Libera el cerrojo
+
+void g() {
+  thread t1(f); thread t2(f);
+  t1.join(); t2.join();
+
+  cout << x << endl;
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Adquisición de múltiples \texttt{mutex}}
+\begin{itemize}
+  \item La función \cppid{lock()} permite adquirir a la vez varios \cppid{mutex}.
+    \begin{itemize}
+      \item Adquiere todos o ninguno.
+      \item Si alguno está bloqueado espera dejando libres todos.
+    \end{itemize}
+\begin{lstlisting}
+mutex m1, m2, m3;
+void f() {
+  lock(m1, m2, m3);
+  // Acceso a datos compartidos
+
+} // Cuidado: No se liberan los cerrojos
+\end{lstlisting}
+  \pause
+  \item Especialmente útil en cooperación con \cppid{unique\_lock}
+\begin{lstlisting}
+void f() {
+  unique_lock l1{m1, defer_lock}, unique_lock l2{m2, defer_lock};
+  lock(l1, l2);
+  // Acceso a datos compartidos
+
+} // Ahora si se liberan los cerrojos
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\subsection{Mecanismos de espera}
+
+\begin{frame}[fragile]{Esperas de tiempo}
+\begin{itemize}
+  \item Acceso al reloj.
+\begin{lstlisting}
+using namespace std::chrono;
+auto t1 = high_resolution_clock::now();
+\end{lstlisting}
+  \item Diferencia de tiempos.
+\begin{lstlisting}
+auto dif = duration_cast<nanoseconds>(t2-t1);
+cout << dif.count() << endl;
+\end{lstlisting}
+  \item Especificación de una espera.
+\begin{lstlisting}
+this_thread::sleep_for(microseconds{500});
+this_thread::sleep_until(t + milliseconds{10});
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Variables condición}
+\begin{itemize}
+  \item Mecanismo para sincronizar hilos en acceso a recursos compartidos.
+    \begin{itemize}
+      \item \cppid{wait()}: Espera en un \cppid{mutex}.
+      \item \cppid{notify\_one()}: Despierta a un hilo en espera.
+      \item \cppid{notify\_all()}: Despierta a todos los hilos en espera.
+    \end{itemize}
+\begin{lstlisting}
+class peticion;
+
+queue<peticion> cola;
+condition_variable cv;
+mutex m;
+
+void productor();
+void consumidor();
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Productor}
+\begin{lstlisting}
+void consumidor() {
+  for (;;) {
+    unique_lock<mutex> l{m};
+
+    while (cv.wait(l));
+
+    auto m = cola.front();
+    cola.pop();
+    l.unlock();
+   
+    procesa(p);
+  };
+}
+\end{lstlisting}
+\begin{itemize}
+  \item Efecto de \cppid{wait}:
+    \begin{enumerate}
+      \item Libera el cerrojo y espera una notificación.
+      \item Adquiere el cerrojo al despertarse.
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Consumidor}
+\begin{lstlisting}
+void productor() {
+  for (;;) {
+    peticion p = genera();
+
+    unique_lock<mutex> l{m};
+    m.push(p);
+
+    cv.notify_one();
+  }
+}
+\end{lstlisting}
+\begin{itemize}
+\item Efecto de \cppid{notify\_one()}:
+  \begin{enumerate}
+    \item Despierta a uno de los hilos esperando en la condición.
+  \end{enumerate}
+\end{itemize}
+\end{frame}
+

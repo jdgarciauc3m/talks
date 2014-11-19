@@ -1,0 +1,154 @@
+\subsection{Terminación de hilos}
+
+\begin{frame}[fragile]{Unión de tareas}
+\begin{itemize}
+  \item Cuando un hilo desea esperar a que otro hilo finalice puede usar la operación \cppid{join()}.
+    \begin{itemize}
+      \item \cppid{t.join()} $\rightarrow$ espera a que t haya finalizado.
+    \end{itemize}
+\end{itemize}
+\begin{block}{hilos/join1.cpp}
+\lstinputlisting[lastline=15]{hilos/join1.cpp}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo}
+\begin{block}{progreso.cpp}
+\begin{lstlisting}
+void actualiza_barra() {
+  while (!tarea_terminada()) {
+    this_thread::sleep_for(chrono::second(1))
+    actualiza_progreso();
+  }
+}
+
+void f() {
+  thread t{actualiza_barra};
+  alguna_otra_cosa();
+  t.join();
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{¿Qué pasa si se olvida \texttt{join}?}
+\begin{itemize}
+  \item Si se sale del alcance donde se define el hilo, se invoca al destructor.
+  \item \alert{Problema}: Se podría perder el vínculo con un hilo del sistema que se seguiría
+        ejecutando y al que no se podría acceder.
+    \begin{itemize}
+      \item Si no se ha hecho \cppid{join()} el destructor llama a \cppid{terminate()}.
+    \end{itemize}
+\begin{lstlisting}
+void actualiza() {
+  for (;;) {
+    muestra_reloj(stead_clock::now());
+    this_thread::sleep_for(second{1});
+  }
+}
+
+void f() {
+  thread t(actualiza);
+}
+\end{lstlisting}
+  \item Se ejecuta \cppid{terminate()} al abandonar \cppid{f()}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Problemas con la destrucción}
+\begin{lstlisting}
+void f();
+void g();
+
+void ejemplo() {
+  thread t1{f}; // Hilo que ejecuta la tarea f
+  thread t2; // Hilo vacío.
+
+  if (modo == modo1) {
+    thread tg {g}; 
+    // ...
+    t2 = move(tg); // tg vacía, t2 asociada a g()
+  }
+
+  vector<int> v{10000}; // Podría lanzar excepciones
+  t1.join();
+  t2.join();
+}
+\end{lstlisting}
+\begin{itemize}
+  \item ¿Qué ocurre si el constructor de \cppid{v} lanza una excepción.
+  \item ¿Qué ocurre si se llega al final con \cppid{modo==modo1}?
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Hilo automático}
+\begin{block}{Se puede usar el patrón RAII}
+\begin{lstlisting}
+struct hilo_automatico : thread {
+  using thread::thread;
+  ~hilo_automatico() { 
+    if (t.joinable()) t.join(); 
+  }
+};
+\end{lstlisting}
+\end{block}
+\begin{block}{Simplificación de código y seguridad}
+\begin{lstlisting}
+void ejemplo() {
+  hilo_automatico t1{f}; // Hilo que ejecuta la tarea f
+  hilo_automatico t2; // Hilo vacío.
+
+  if (modo == modo1) {
+    hilo_automatico tg {g}; 
+    // ...
+    t2 = move(tg); // tg vacía, t2 asociada a g()
+  }
+
+  vector<int> v{10000}; // Podría lanzar excepciones
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Hilos no asociados}
+\begin{itemize}
+  \item Se puede usar \cppid{detach()} para indicar que un hilo siga ejecutando 
+        después de que el destructor se ejecute.
+  \item Útil para tareas que se ejecutan como demonios.
+\begin{lstlisting}
+void actualiza() {
+  for (;;) {
+    muestra_reloj(stead_clock::now());
+    this_thread::sleep_for(second{1});
+  }
+}
+
+void f() {
+  thread t(actualiza);
+  t.detach();
+}
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Problemas con hilos no asociados}
+\begin{itemize}
+  \item \alert{Incovenientes}:
+    \begin{itemize}
+      \item Se pierde el control de qué hilos están activos.
+      \item No se sabe si se puede usar el resultado generado por un hilo.
+      \item No se sabe si un hilo ha liberado sus recursos.
+      \item Se podría acabar accediendo a objetos que han sido destruidos.
+    \end{itemize}
+  \pause
+  \vspace{1em}
+  \item \alert{Recomendaciones}:
+    \begin{itemize}
+      \item Evitar el uso de hilos no asociados.
+      \item Mover los hilos a otro alcance (via valor de retorno).
+      \item Mover los hilos a un contenedor en un alcance mayor.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+

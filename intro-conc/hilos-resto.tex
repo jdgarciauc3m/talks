@@ -1,0 +1,51 @@
+\subsection{Almacenamiento local al hilo}
+
+\begin{frame}{Variables locales a hilos}
+\begin{itemize}
+  \item Alternativa a \cppkey{static} como especificador de almacenamiento: \cppkey{thread\_local}.
+    \begin{itemize}
+      \item Una variable \cppkey{static} tiene una única copia compartida por todos los hilos.
+      \item Una variable \cppkey{thread\_local} tiene una copia por cada hilo.
+    \end{itemize}
+  \pause
+  \item Tiempo de vida: duración de almacenamiento de hilo (\emph{thread storage duration}).
+    \begin{itemize}
+      \item Se inicia antes de su primer uso en el hilo.
+      \item Se destruye en la salida del hilo.
+    \end{itemize}
+  \pause
+  \item Razones para usar almacenamiento local al hilo:
+    \begin{itemize}
+      \item Transformar datos de almacenamiento estático a almacenamiento local al hilo.
+      \item Mantener cachés de datos locales a cada hilo (acceso exclusivo).
+        \begin{itemize}
+          \item Importante en máquinas con caché separada y protocolos de coherencia.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo}
+\begin{block}{Una lista de claves}
+\begin{lstlisting}
+thread_local map<int, int> cache;
+
+int calcula_clave(int x) {
+  auto i = cache.find(x);
+  if (i != cache.end()) return i->second;
+  return cache[arg] = algoritmo_complejo(arg);
+}
+
+vector<int> genera_lista(vector<int> v) {
+  vector<int> r;
+  for (auto x : v) {
+    r.push_back(calcula_clave(x));
+  }
+}
+\end{lstlisting}
+\end{block}
+\begin{itemize}
+  \item Se evita sincronización.
+  \item Puede que se repita algún cálculo.
+\end{itemize}
+\end{frame}

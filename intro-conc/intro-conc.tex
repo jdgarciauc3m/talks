@@ -1,0 +1,96 @@
+\documentclass{beamer}
+
+% Español
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Tipo de letra
+\usepackage{palatino}
+
+% Plantilla
+\usetheme{Antibes}
+%\usetheme{Berlin}
+
+
+\usepackage[scale=1.2]{ccicons}
+
+\input{cpp11-config}
+
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot} \ccbyncsaeu \ J. Daniel Garcia -- ARCOS@UC3M (josedaniel.garcia@uc3m.es)
+    \hfill
+    \insertframenumber/\inserttotalframenumber
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{arrows}
+\usetikzlibrary{mindmap}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.5}
+
+\usepackage{tabularx}
+
+\addtobeamertemplate{headline}{}
+{% 
+\begin{tikzpicture}[remember picture,overlay]
+\node[anchor=north east] at (current page.north east) {\includegraphics[height=0.7cm]{logos/arcos.png}};
+\end{tikzpicture}
+}
+
+  \tikzset{
+    invisible/.style={opacity=0},
+    visible on/.style={alt=#1{}{invisible}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+    },
+  }
+
+%Portada
+\title{Concurrencia simple y portable en C++ moderno}
+\author{J. Daniel Garcia}
+\institute{Universidad Carlos III de Madrid}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\AtBeginSection[]
+{
+  \begin{frame}<*>
+    \setbeamertemplate{section in toc shaded}[default][50]
+    \setbeamertemplate{subsection in toc shaded}[default][50]
+    \tableofcontents[currentsection,hideallsubsections]
+  \end{frame}
+}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \setbeamertemplate{subsection in toc shaded}[default][50]
+    \tableofcontents[sectionstyle=show/hide,subsectionstyle=show/shaded/hide]
+  \end{frame}
+}
+
+\input{arcos}
+\input{intro}
+\input{minima} 
+\input{hilos} 
+\input{mutex} 
+\input{prodcons}
+\input{usingstdcpp}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\end{document}

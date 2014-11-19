@@ -1,0 +1,97 @@
+\section{Concurrencia mínima}
+
+\subsection{Tareas asíncronas}
+
+\begin{frame}[t]{Historia de dos tareas}
+\begin{block}{tasks.h}
+\lstinputlisting{async/tasks.h}
+\end{block}
+\end{frame}
+
+\begin{frame}[t,fragile]{Ejecutando las tareas secuencialmente}
+\begin{block}{main1.cpp}
+\lstinputlisting{async/main1.cpp}
+\end{block}
+\begin{lstlisting}[style=terminal]
+$ time ./test1
+++++++++++********************
+real	0m0.158s
+user	0m0.004s
+sys	0m0.000s
+\end{lstlisting}
+
+\begin{itemize}
+  \item Ambas tareas se pueden ejecutar concurrentemente.
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Ejecutando las tareas concurrentemente}
+\begin{block}{main2.cpp}
+\lstinputlisting{async/main2.cpp}
+\end{block}
+\end{frame}
+
+\begin{frame}[t,fragile]{Concurrencia}
+\begin{lstlisting}[style=terminal]
+$ time ./test1
++*+**+*+*+*+*+*+*+*+**********
+real	0m0.106s
+user	0m0.004s
+sys	0m0.000s
+\end{lstlisting}
+
+\begin{itemize}
+  \item Salida entrelazada a \cppid{cout}.
+  \item Aprovechamiento del tiempo.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[t,fragile]{Políticas de ejecución}
+\begin{itemize}
+  \item La biblioteca ofrece dos políticas de ejecución.
+    \begin{itemize}
+      \item \cppid{std::launch::async}.
+        Ejecución asíncrona \emph{posiblemente} (as-if) en otro hilo.
+      \item \cppid{std::launch::deferred}.
+        Ejecución en el mismo hilo cuando se invca a \cppid{get}.
+    \end{itemize}
+  \pause
+  \item ¿Y si no se especifica la política?
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+std::async(f);
+\end{lstlisting}
+    \begin{itemize}
+      \item Como si se invocase a \cppid{std::launch::async} \cppkey{|} \cppid{std::launch::deferred}.
+      \item La implementación decide.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Parámetros y resultados de una tarea}
+
+\begin{frame}[t]{Una tarea de cálculo}
+\begin{block}{main3.cpp (I)}
+\lstinputlisting[lastline=19]{async/main3.cpp}
+\end{block}
+\end{frame}
+
+\begin{frame}[t]{Pasando parámetros y recogiendo resultados}
+\begin{block}{main3.cpp (y II)}
+\lstinputlisting[firstline=21]{async/main3.cpp}
+\end{block}
+\end{frame}
+
+\begin{frame}[t]{Una tarea excepcional}
+\begin{block}{main4.cpp (I)}
+\lstinputlisting[lastline=13]{async/main4.cpp}
+\end{block}
+\end{frame}
+
+\begin{frame}[t]{Una tarea excepcional}
+\begin{block}{main4.cpp (y III)}
+\lstinputlisting[firstline=13]{async/main4.cpp}
+\end{block}
+\end{frame}

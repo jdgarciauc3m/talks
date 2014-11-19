@@ -1,0 +1,78 @@
+\subsection{Construcción e identidad}
+
+\begin{frame}[fragile]{Construcción de hilos}
+\begin{itemize}
+  \item Un hilo se construye con una función y los argumentos que se debe pasar a la función.
+    \begin{itemize}
+      \item Plantilla con número variable de argumentos.
+      \item Seguro en tipos.
+    \end{itemize}
+\begin{lstlisting}
+void f();
+void g(int, double);
+
+thread t1{f}; // OK
+thread t2{f, 1}; // Error: demasiados argumentos.
+
+thread t3{g, 1, 0.5}; // OK
+thread t4{g}; // Error: faltan argumentos.
+thread t5{g, 1, "Hola"}; // Error: tipos incorrectos
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Construcción y referencias}
+\begin{itemize}
+  \item El constructor de \cppid{thread} es una plantilla con argumentos variables.
+\begin{lstlisting}
+template <class F, class ...Args> 
+explicit thread(F&& f, Args&&... args);
+\end{lstlisting}
+  \pause
+  \item El paso de parámetros a un hilo es por valor.
+  \item Para forzar el paso de parámetros por referencia:
+    \begin{itemize}
+      \item Usar una función de ayuda para \cppid{reference\_wrapper}.
+      \item Usar lambdas y capturas por referencia.
+    \end{itemize}
+\begin{lstlisting}
+void f(registro & r);
+
+void g(registro & s) {
+  thread t1{f,s};
+  thread t2{f, ref(s)};
+  thread t3{[&] { f(s); }};
+}
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Construcción en dos etapas}
+\begin{itemize}
+  \item La construcción incluye el inicio de la ejecución del hilo.
+    \begin{itemize}
+      \item No hay operación separada para \emph{iniciar} la ejecución.
+    \end{itemize}
+\begin{lstlisting}
+struct productor {
+  productor(cola<peticiones> & c);
+  void operator()();
+  // ...
+};
+
+struct consumidor {
+  consumidor(cola<peticiones> & c);
+  void operator()();
+  // ...
+};
+
+cola<peticiones> c;
+productor prod{c};
+consumidor cons{c};
+
+thread tp{prod};
+thread tc{cons};
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+

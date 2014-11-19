@@ -1,0 +1,160 @@
+\section{La concurrencia está aquí}
+
+\subsection{The free lunch is over}
+
+
+\begin{frame}[t]{Evolución}
+\begin{itemize}
+  \item Hasta 2005 (aprox.) incremento sostenido en frecuencias de reloj.
+    \begin{itemize}
+      \item Incrementos del rendmiento en torno al 52\% anual.
+    \end{itemize}
+  \vspace{12pt}
+  \pause
+  \item Pero entonces \ldots
+    \begin{itemize}
+      \item Se acabó la fiesta (\emph{The free lunch is over}).
+      \item Estabilización de frecuencias de reloj en torno a 3GHz.
+      \item La industria apuesta por multi/many-core.
+    \end{itemize}
+  \vspace{12pt}
+  \pause
+  \item La concurrencia y el paralelismo se convierten en más relevantes.
+    \begin{itemize}
+      \item \alert{Recuerda}: No son lo mismo pero muy interrelacionados.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Concurrencia y paralelismo}
+\begin{itemize}
+  \item \textbf{Concurrencia}: Ejecución de varias tareas de forma que el inicio de una
+se encuentra entre el principio y final de otra.
+    \begin{itemize}
+      \item Puede darse en un único procesador.
+      \item Objetivos:
+        \begin{itemize}
+          \item Mejorar aprovechamiento de recursos (trabajos por unidad de tiempo).
+          \item Mejorar experiencia de respuesta en presencia de E/S.
+          \item Mejorar estructura de programas basados en tareas.
+        \end{itemize}
+    \end{itemize}
+
+  \vspace{12pt}
+  \pause
+  \item \textbf{Paralelismo}: Ejecución de varias tareas de forma simultánea.
+    \begin{itemize}
+      \item Típicamente cada tarea usa un procesador (o un core).
+      \item Objetivos:
+        \begin{itemize}
+          \item Mejorar el rendimiento (tiempo de un trabajo).
+          \item Mejorar la escalabilidad.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{C++ y la concurrencia}
+
+\begin{frame}[t]{¿Por qué?}
+\begin{itemize}
+  \item Portabilidad:
+    \begin{itemize}
+      \pause
+      \item Antes de 2011 diversos modelos de programación concurrente.
+        \begin{itemize}
+          \item Windows Threads, POSIX Threads, \ldots
+          \item Extensiones en el compilador: \cppid{\_\_declspec( thread )},
+\cppid{\_\_thread}, \ldots
+        \end{itemize}
+      \pause
+      \item Necesidad de código no portable para operaciones libres de cerrojos.
+        \begin{itemize}
+          \item Típicamente en ensamblador.
+        \end{itemize}
+    \end{itemize}
+  \pause
+  \item Completitud y corrección:
+    \begin{itemize}
+      \item Un modelo de hilos no puede implementarse sin soporte del
+compilador.
+        \begin{itemize}
+          \item H. Bohem. \emph{Threads cannot be implemented as a library}.
+PLDI'2005.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Y además \ldots}
+\begin{itemize}
+  \item Formalización del modelo de memoria.
+    \begin{itemize}
+      \item Hasta 2005 varios fabricantes no habían clarificado su modelo
+            de consistencia de memoria.
+      \item Formalización compleja.
+      \item Problemas de implementación en lenguajes (Java, C, C++).
+      \item Efecto: Clarificación de los fabricantes de procesadores.
+    \end{itemize}
+  \pause
+  \vspace{12pt}
+  \item Efecto sobre C11.
+    \begin{itemize}
+      \item Incluisión de un modelo de hilos muy similar.
+      \item Portabilidad de hilos en C (mejor que pthreads).
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{¿Qué no está incluido?}
+\begin{itemize}
+  \item Paralelismo: ISO/IEC TS 19570.
+\begin{lstlisting}
+sort(par, v.begin(), v.end());
+transform(vec, v.begin(), v.end(), [](auto x) { return x*2; });
+\end{lstlisting}
+  \item Más concurrencia: ISO/IEC TS 19571.
+\begin{lstlisting}
+thread_pool pool;
+for (int i=0;i<max;++i) v.push_back(add(pool, calcula, i));
+for (auto & x : v) res += x.get();
+\end{lstlisting}
+  \item Memoria transaccional.
+\begin{lstlisting}
+void cuenta::ingresa(double x) {
+  atomic_noexcept {
+    saldo += x;
+  }
+}
+\end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t]{Elementos}
+\begin{itemize}
+  \item Un nuevo modelo de memoria.
+  \pause
+  \item Almacenamiento local al hilo estándar (\cppkey{thread\_local}).
+  \pause
+  \item Una interfaz simple de alto nivel para ejecución de tareas.
+    \begin{itemize}
+      \item \cppid{async} y \cppid{future}.
+    \end{itemize}
+  \pause
+  \item Una interfaz más detallada para ejecución de hilos.
+    \begin{itemize}
+      \item \cppid{thread} y \cppid{promise}
+    \end{itemize}
+  \pause
+  \item Mecanismos de sincronización.
+    \begin{itemize}
+      \item \emph{Mutex}, cerrojos y variables condición.
+    \end{itemize}
+  \pause
+  \item Una interfaz portable de bajo nivel para programación \emph{lock-free} y
+\emph{wait-free}.
+    \begin{itemize}
+      \item Tipos \cppid{atomic<>}.
+    \end{itemize}
+\end{itemize}
+\end{frame}

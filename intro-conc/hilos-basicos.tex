@@ -1,0 +1,82 @@
+\subsection{Introducción}
+
+\begin{frame}[t]{La clase \texttt{thread}}
+\begin{itemize}
+  \item La abstracción de hilo representada mediante clase \cppid{std::thread}.
+  \item Todos los hilos de una aplicación se ejecuta en el mismo espacio de direcciones.
+  \item Cada hilo tiene su propia pila.
+  \pause
+  \item \alert{Peligros}:
+    \begin{itemize}
+      \item Pasar un puntero o una referencia no constante a otro hilo.
+      \item Paso de referencia a través de captura en expresiones lambdas.
+    \end{itemize}
+  \item \cppid{thread} representa un enlace a un hilo del sistema.
+    \begin{itemize}
+      \item No se pueden copiar.
+      \item Si se pueden mover.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Lanzamiento de hilos}
+\begin{itemize}
+  \item Un hilo representado por la clase \cppid{std::thread}.
+    \begin{itemize}
+      \item Normalmente representa un hilo del SO.
+    \end{itemize}
+\end{itemize}
+\begin{block}{}
+\begin{lstlisting}
+void f1();
+
+struct f2 {
+  void operator()();
+};
+
+void g() {
+  thread t1{f1}; // Lanza un hilo que ejecuta f1()
+  thread t2{f2()}; // Lanza un hilo que ejecuta f2::operator()()
+
+  t1.join(); // Espera a que t1 termine.
+  t2.join(); // Espera a que t2 termine.
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Objetos compartidos}
+\begin{itemize}
+  \item Dos hilos pueden acceder a un objeto compartido.
+  \item Posibilidad de carreras de datos.
+\end{itemize}
+\begin{block}{carrera.cpp}
+\lstinputlisting[lastline=13]{hilos/carrera.cpp}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Un poco de ayuda}
+\begin{lstlisting}[style=terminal]
+$ valgrind --tool=helgrind ./carrera
+==21180== Helgrind, a thread error detector
+==21180== Copyright (C) 2007-2011, and GNU GPL'd, by OpenWorks LLP et al.
+[...]
+==21180== Possible data race during read of size 8 at 0x5C27060 by thread #1
+[...]
+==21180== This conflicts with a previous write of size 8 by thread #3
+[...]
+==21180== Possible data race during write of size 8 at 0x5C27050 by thread #1
+[...]
+==21180== This conflicts with a previous read of size 8 by thread #3
+[...]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[t]{Paso de argumentos}
+\begin{itemize}
+  \item Paso de parámetros simplificado sin necesidad de \emph{casts}.
+\end{itemize}
+\begin{block}{params.cpp}
+\lstinputlisting[lastline=20]{hilos/params.cpp}
+\end{block}
+\end{frame}
